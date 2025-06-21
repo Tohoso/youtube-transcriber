@@ -1,0 +1,29 @@
+# YouTube Transcriber Configuration
+
+api:
+  youtube_api_key: ${YOUTUBE_API_KEY}
+  quota_limit: 10000
+
+processing:
+  concurrent_limit: 5
+  retry_attempts: 3
+  retry_delay: 1.0
+  rate_limit_per_minute: 60
+  timeout_seconds: 30
+  skip_private_videos: true
+  skip_live_streams: true
+
+output:
+  default_format: txt
+  output_directory: ./output
+  filename_template: "{date}_{title}_{video_id}"
+  include_metadata: true
+  include_timestamps: false
+  max_filename_length: 100
+
+logging:
+  level: INFO
+  log_file: logs/app.log
+  max_file_size: "500 MB"
+  retention_days: 10
+  enable_json_logging: false

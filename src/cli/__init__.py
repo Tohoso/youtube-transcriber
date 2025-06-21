@@ -1,0 +1,1 @@
+"""CLI module for YouTube Transcriber."""

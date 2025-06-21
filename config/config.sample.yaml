@@ -1,0 +1,198 @@
+# YouTube Transcriber Configuration
+# Copy this file to config.yaml and update with your settings
+
+# API Configuration
+api:
+  # YouTube Data API key (required)
+  # Get your API key from: https://console.cloud.google.com/apis/credentials
+  youtube_api_key: "YOUR_YOUTUBE_API_KEY_HERE"
+  
+  # Rate limiting settings
+  rate_limit:
+    # Maximum requests per minute
+    requests_per_minute: 100
+    # Delay between requests (seconds)
+    request_delay: 0.5
+    # Maximum concurrent requests
+    max_concurrent: 10
+
+# Processing Configuration
+processing:
+  # Maximum videos to process per channel (0 = unlimited)
+  max_videos_per_channel: 0
+  
+  # Video filtering
+  filters:
+    # Minimum video duration (seconds)
+    min_duration: 60
+    # Maximum video duration (seconds, 0 = unlimited)
+    max_duration: 18000  # 5 hours
+    # Skip private videos
+    skip_private: true
+    # Skip unlisted videos
+    skip_unlisted: false
+    # Languages to include (empty = all languages)
+    languages: []
+    # Example: ["en", "ja", "es"]
+  
+  # Retry configuration
+  retry:
+    # Maximum retry attempts for failed videos
+    max_attempts: 3
+    # Delay between retries (seconds)
+    retry_delay: 5
+    # Exponential backoff multiplier
+    backoff_multiplier: 2
+    # Retry on these error types
+    retryable_errors:
+      - "Network Error"
+      - "Timeout Error"
+      - "Unknown Error"
+
+# Output Configuration
+output:
+  # Base directory for output files
+  base_directory: "output"
+  
+  # Directory structure
+  # Available variables: {channel_id}, {channel_name}, {date}
+  directory_structure: "{channel_name}_{channel_id}"
+  
+  # Transcript file format
+  formats:
+    # Save as JSON
+    json:
+      enabled: true
+      # Include timestamps
+      include_timestamps: true
+      # Pretty print JSON
+      pretty_print: true
+    
+    # Save as plain text
+    text:
+      enabled: true
+      # Include timestamps in text
+      include_timestamps: false
+      # Line break after each segment
+      segment_breaks: true
+    
+    # Save as SRT (subtitle format)
+    srt:
+      enabled: false
+      # Maximum characters per subtitle
+      max_chars_per_subtitle: 80
+    
+    # Save as VTT (WebVTT format)
+    vtt:
+      enabled: false
+
+# Display Configuration
+display:
+  # Show progress bar
+  show_progress: true
+  # Show detailed statistics
+  show_statistics: true
+  # Update frequency (seconds)
+  update_frequency: 1
+  # Show individual video results
+  show_video_results: true
+  # Show error details
+  show_error_details: true
+  # Use rich formatting (colors, tables)
+  use_rich_output: true
+
+# Logging Configuration
+logging:
+  # Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  level: "INFO"
+  
+  # Log file settings
+  file:
+    enabled: true
+    # Log file path
+    path: "logs/youtube_transcriber.log"
+    # Maximum log file size (MB)
+    max_size: 10
+    # Number of backup files to keep
+    backup_count: 5
+    # Include timestamps
+    include_timestamps: true
+  
+  # Console logging
+  console:
+    enabled: true
+    # Use colored output
+    use_colors: true
+
+# Performance Configuration
+performance:
+  # Enable performance monitoring
+  monitoring_enabled: true
+  
+  # Memory limits
+  memory:
+    # Maximum memory usage (MB, 0 = unlimited)
+    max_memory_mb: 0
+    # Garbage collection threshold (MB)
+    gc_threshold_mb: 500
+  
+  # Processing optimization
+  optimization:
+    # Use async processing
+    use_async: true
+    # Batch size for processing
+    batch_size: 10
+    # Enable caching
+    use_cache: true
+    # Cache expiration (hours)
+    cache_expiration_hours: 24
+
+# Advanced Configuration
+advanced:
+  # Custom headers for API requests
+  custom_headers: {}
+  # Example:
+  # custom_headers:
+  #   "User-Agent": "YouTubeTranscriber/1.0"
+  
+  # Proxy configuration
+  proxy:
+    enabled: false
+    http_proxy: ""
+    https_proxy: ""
+    no_proxy: []
+  
+  # SSL/TLS settings
+  ssl:
+    # Verify SSL certificates
+    verify: true
+    # Custom CA bundle path
+    ca_bundle_path: ""
+  
+  # Debug settings
+  debug:
+    # Save raw API responses
+    save_raw_responses: false
+    # Enable verbose logging
+    verbose: false
+    # Profile performance
+    profile: false
+
+# Test Configuration (for development/testing)
+test:
+  # Use mock data instead of real API
+  use_mock_data: false
+  # Mock data settings
+  mock:
+    # Simulate API delays
+    simulate_delays: true
+    # Failure rate (0.0 - 1.0)
+    failure_rate: 0.1
+    # Available test channels
+    test_channels:
+      - id: "UCXuqSBlHAE6Xw-yeJA0Tunw"
+        name: "Test Channel 1"
+        video_count: 50
+      - id: "UC-lHJZR3Gqxm24_Vd_AJ5Yw"
+        name: "Test Channel 2"
+        video_count: 100
