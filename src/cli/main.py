@@ -9,8 +9,10 @@ from rich.console import Console
 from rich.panel import Panel
 
 from ..application.orchestrator import TranscriptOrchestrator
+from ..application.batch_orchestrator import BatchChannelOrchestrator
 from ..models.config import AppSettings
 from ..utils.logging import setup_logging
+from .multi_channel_interface import MultiChannelInterface, add_multi_channel_commands
 
 app = typer.Typer(
     name="youtube-transcriber",
@@ -18,6 +20,28 @@ app = typer.Typer(
     add_completion=True,
 )
 console = Console()
+
+# Add multi-channel commands
+add_multi_channel_commands(app)
+
+
+async def run_transcription(
+    settings: AppSettings,
+    channel_input: str,
+    language: str,
+    date_from: Optional[str],
+    date_to: Optional[str],
+    dry_run: bool
+):
+    """Run the transcription process with proper resource management."""
+    async with TranscriptOrchestrator(settings) as orchestrator:
+        await orchestrator.process_channel(
+            channel_input=channel_input,
+            language=language,
+            date_from=date_from,
+            date_to=date_to,
+            dry_run=dry_run
+        )
 
 
 @app.command()
@@ -89,9 +113,8 @@ def transcribe(
             log_file=str(settings.logging.log_file) if settings.logging.log_file else None
         )
         
-        orchestrator = TranscriptOrchestrator(settings)
-        
-        asyncio.run(orchestrator.process_channel(
+        asyncio.run(run_transcription(
+            settings=settings,
             channel_input=channel_input,
             language=language,
             date_from=date_from,
@@ -137,6 +160,7 @@ def load_settings(config_path: Optional[Path] = None) -> AppSettings:
     """Load application settings."""
     import os
     from dotenv import load_dotenv
+    from ..models.config import APIConfig
     
     load_dotenv()
     
@@ -148,6 +172,9 @@ def load_settings(config_path: Optional[Path] = None) -> AppSettings:
             config_data["api"] = {}
         if "youtube_api_key" not in config_data["api"]:
             config_data["api"]["youtube_api_key"] = os.getenv("YOUTUBE_API_KEY", "")
+        
+        # Convert api dict to APIConfig object
+        config_data["api"] = APIConfig(**config_data["api"])
             
         return AppSettings(**config_data)
     else:
@@ -157,7 +184,7 @@ def load_settings(config_path: Optional[Path] = None) -> AppSettings:
                 "YouTube API key not found. "
                 "Set YOUTUBE_API_KEY environment variable or use --config"
             )
-        return AppSettings(api={"youtube_api_key": api_key})
+        return AppSettings(api=APIConfig(youtube_api_key=api_key))
 
 
 def generate_sample_config() -> str:

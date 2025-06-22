@@ -36,7 +36,7 @@ class RateLimiter:
             if self.allowance > self.rate:
                 self.allowance = self.rate
             
-            if self.allowance < tokens:
+            if self.allowance is not None and tokens is not None and self.allowance < tokens:
                 sleep_time = (tokens - self.allowance) * (self.per / self.rate)
                 logger.debug(f"Rate limit reached, sleeping for {sleep_time:.2f}s")
                 await asyncio.sleep(sleep_time)

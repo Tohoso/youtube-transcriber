@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: youtube-transcriber-config
+  namespace: youtube-transcriber
+data:
+  # Application configuration
+  APP_NAME: "YouTube Transcriber"
+  APP_VERSION: "1.0.0"
+  LOG_LEVEL: "INFO"
+  
+  # Processing configuration
+  CONCURRENT_LIMIT: "10"
+  RATE_LIMIT_PER_MINUTE: "60"
+  MAX_CHANNELS_PARALLEL: "5"
+  MAX_VIDEOS_PER_CHANNEL: "10"
+  SKIP_PRIVATE_VIDEOS: "true"
+  SKIP_LIVE_STREAMS: "true"
+  REQUEST_TIMEOUT_SECONDS: "30"
+  
+  # Batch processing
+  BATCH_SIZE: "10"
+  MEMORY_LIMIT_MB: "2048"
+  SAVE_PROGRESS: "true"
+  CHANNEL_TIMEOUT_MINUTES: "60"
+  
+  # Output configuration
+  OUTPUT_DIRECTORY: "/app/output"
+  DEFAULT_FORMAT: "txt"
+  INCLUDE_METADATA: "true"
+  INCLUDE_TIMESTAMPS: "false"
+  MAX_FILENAME_LENGTH: "100"
+  
+  # Monitoring
+  ENABLE_METRICS: "true"
+  METRICS_PORT: "9090"
+  ENABLE_HEALTH_CHECK: "true"
+  HEALTH_CHECK_PORT: "8080"
+  
+  # config.yaml content
+  config.yaml: |
+    api:
+      quota_limit: 10000
+    
+    processing:
+      concurrent_limit: 10
+      retry_attempts: 3
+      retry_delay: 1.0
+      rate_limit_per_minute: 60
+      timeout_seconds: 30
+      skip_private_videos: true
+      skip_live_streams: true
+    
+    output:
+      default_format: txt
+      output_directory: /app/output
+      filename_template: "{date}_{title}_{video_id}"
+      include_metadata: true
+      include_timestamps: false
+      max_filename_length: 100
+    
+    logging:
+      level: INFO
+      log_file: /app/logs/app.log
+      max_file_size: "500 MB"
+      retention_days: 10
+      enable_json_logging: false
+    
+    batch:
+      max_channels: 5
+      channel_timeout_minutes: 60
+      save_progress: true
+      progress_file: /app/output/.progress.json
+      queue_size: 100
+      batch_size: 10
+      memory_limit_mb: 2048

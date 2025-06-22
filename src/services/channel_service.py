@@ -41,14 +41,15 @@ class ChannelService:
         Raises:
             ValueError: If channel input is invalid
         """
-        channel_id = self.extract_channel_id(channel_input)
-        
-        logger.info(f"Getting channel information for ID: {channel_id}")
+        logger.info(f"Getting channel information for: {channel_input}")
         
         channel = await self.retry_manager.execute(
             self.youtube_repo.get_channel_info,
-            channel_id=channel_id
+            channel_input
         )
+        
+        if not channel:
+            raise ValueError(f"Channel not found: {channel_input}")
         
         # Initialize processing statistics
         channel.processing_stats = ProcessingStatistics(

@@ -4,6 +4,7 @@ import asyncio
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Set
+import aiohttp
 from loguru import logger
 
 from ..cli.display import DisplayManager
@@ -11,6 +12,7 @@ from ..models.channel import Channel, ProcessingStatistics
 from ..models.config import AppSettings
 from ..models.transcript import TranscriptData, TranscriptStatus
 from ..models.video import Video
+from ..repositories.youtube_api import YouTubeAPIRepository
 from ..services import ChannelService, TranscriptService, ExportService
 from ..utils.retry import RetryManager
 
@@ -26,14 +28,45 @@ class TranscriptOrchestrator:
         """
         self.settings = settings
         self.display = DisplayManager()
+        self._session: Optional[aiohttp.ClientSession] = None
         
-        # Initialize services
-        self.channel_service = ChannelService()
-        self.transcript_service = TranscriptService()
+        # Services will be initialized in setup()
+        self.channel_service: Optional[ChannelService] = None
+        self.transcript_service: Optional[TranscriptService] = None
         self.export_service = ExportService(output_config=settings.output)
         
         self._semaphore = asyncio.Semaphore(settings.processing.concurrent_limit)
         self._processed_videos: Set[str] = set()
+    
+    async def __aenter__(self):
+        """Async context manager entry."""
+        await self.setup()
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        await self.cleanup()
+    
+    async def setup(self):
+        """Set up async resources."""
+        # Create aiohttp session
+        self._session = aiohttp.ClientSession()
+        
+        # Initialize YouTube API repository with session
+        youtube_repo = YouTubeAPIRepository(
+            api_key=self.settings.api.youtube_api_key,
+            session=self._session
+        )
+        
+        # Initialize services with proper dependencies
+        self.channel_service = ChannelService(youtube_repo=youtube_repo)
+        self.transcript_service = TranscriptService()
+    
+    async def cleanup(self):
+        """Clean up async resources."""
+        if self._session:
+            await self._session.close()
+            self._session = None
     
     async def process_channel(
         self,
@@ -55,6 +88,13 @@ class TranscriptOrchestrator:
         Returns:
             Channel object with processing results
         """
+        # Ensure services are initialized
+        if not self.channel_service or not self.transcript_service:
+            await self.setup()
+        
+        # Start the Live display for the entire process
+        self.display.start()
+        
         try:
             # Get channel information
             self.display.show_status("Getting channel information...")
@@ -115,6 +155,9 @@ class TranscriptOrchestrator:
         except Exception as e:
             logger.error(f"Channel processing failed: {e}")
             raise
+        finally:
+            # Always stop the Live display
+            self.display.stop()
     
     async def _process_videos_parallel(
         self,
@@ -188,7 +231,7 @@ class TranscriptOrchestrator:
                 )
                 
                 if transcript:
-                    video.transcript = transcript
+                    video.transcript_data = transcript
                     video.transcript_status = TranscriptStatus.SUCCESS
                     channel.processing_stats.successful_videos += 1
                     

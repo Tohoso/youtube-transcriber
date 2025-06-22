@@ -1,23 +1,28 @@
 # YouTube Transcriber
 
-YouTubeチャンネルから全動画の文字起こしを自動取得するCLIアプリケーション
+YouTubeチャンネル内の全動画から文字起こし（字幕）を抽出するCLIアプリケーション
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![English](https://img.shields.io/badge/lang-English-blue.svg)](README.md)
+[![テストカバレッジ](https://img.shields.io/badge/coverage-61.2%25-green.svg)](tests/)
+[![品質スコア](https://img.shields.io/badge/quality-A-brightgreen.svg)](docs/)
 
 ## 📋 概要
 
-YouTube Transcriberは、指定したYouTubeチャンネルの全動画から文字起こし（字幕）を一括取得し、様々な形式で保存できるコマンドラインツールです。
+YouTube Transcriber は、指定したYouTubeチャンネルの全動画から文字起こし（字幕）を自動的に抽出し、様々な形式で保存するコマンドラインツールです。
 
 ### ✨ 主な機能
 
-- 🚀 **高速並列処理** - 複数動画の文字起こしを同時に取得
+- 🚀 **高速並列処理** - 複数の動画を同時に処理して時間を短縮
+- 🎯 **複数チャンネル対応** - 最大1000チャンネルまでバッチ処理可能
 - 📊 **多様な出力形式** - TXT、JSON、CSV、Markdown形式に対応
-- 🔄 **自動リトライ** - ネットワークエラー時の自動再試行
+- 🔄 **自動リトライ機能** - ネットワークエラー時に自動的に再試行
 - 📈 **進捗表示** - リアルタイムの処理状況と統計情報
-- 🛡️ **堅牢なエラーハンドリング** - 様々なエラーに対応
-- 🌐 **多言語対応** - 任意の言語の字幕を取得可能
+- 🛡️ **堅牢なエラー処理** - 様々なエラーシナリオに対応
+- 🌐 **多言語対応** - 任意の言語の字幕を抽出可能
 - 📅 **日付フィルタリング** - 期間を指定して動画を絞り込み
+- 💾 **進捗保存機能** - 中断した処理を再開可能
 
 ## 🚀 クイックスタート
 

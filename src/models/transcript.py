@@ -11,6 +11,7 @@ class TranscriptStatus(str, Enum):
     """Transcript retrieval status."""
     
     PENDING = "pending"
+    IN_PROGRESS = "in_progress"
     SUCCESS = "success"
     NO_TRANSCRIPT = "no_transcript"
     ERROR = "error"
@@ -81,7 +82,13 @@ class TranscriptData(BaseModel):
     def set_full_text(cls, v: str, info) -> str:
         """Generate full text from segments."""
         if not v and 'segments' in info.data and info.data['segments']:
-            return ' '.join(segment.text for segment in info.data['segments'])
+            segments = info.data['segments']
+            if segments and len(segments) > 0:
+                # Handle both dict and TranscriptSegment objects
+                if isinstance(segments[0], dict):
+                    return ' '.join(segment['text'] for segment in segments if 'text' in segment)
+                else:
+                    return ' '.join(segment.text for segment in segments)
         return v
     
     @field_validator('total_duration', mode='before')
@@ -90,15 +97,20 @@ class TranscriptData(BaseModel):
         """Calculate total duration."""
         if v is None and 'segments' in info.data and info.data['segments']:
             segments = info.data['segments']
-            if segments:
-                return max(segment.end_time or 0 for segment in segments)
+            if segments and len(segments) > 0:
+                # Handle both dict and TranscriptSegment objects
+                if isinstance(segments[0], dict):
+                    last_segment = segments[-1]
+                    return last_segment.get('start_time', 0) + last_segment.get('duration', 0)
+                else:
+                    return max((segment.end_time or (segment.start_time + segment.duration)) for segment in segments)
         return v
     
     @field_validator('word_count', mode='before')
     @classmethod
     def set_word_count(cls, v: Optional[int], info) -> Optional[int]:
         """Calculate word count."""
-        if v is None and 'full_text' in info.data:
+        if v is None and 'full_text' in info.data and info.data['full_text']:
             return len(info.data['full_text'].split())
         return v
     
@@ -106,7 +118,7 @@ class TranscriptData(BaseModel):
     @classmethod
     def set_character_count(cls, v: Optional[int], info) -> Optional[int]:
         """Calculate character count."""
-        if v is None and 'full_text' in info.data:
+        if v is None and 'full_text' in info.data and info.data['full_text']:
             return len(info.data['full_text'])
         return v
     

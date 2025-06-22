@@ -1,0 +1,249 @@
+name: Multi-Channel Feature Tests
+
+on:
+  push:
+    paths:
+      - 'src/application/batch_orchestrator.py'
+      - 'src/cli/multi_channel_interface.py'
+      - 'src/services/multi_channel_processor.py'
+      - 'src/models/batch.py'
+      - 'tests/**/test_multi_channel*.py'
+      - 'tests/**/test_*edge_cases*.py'
+      - '.github/workflows/multi-channel-tests.yml'
+  pull_request:
+    paths:
+      - 'src/**/*channel*.py'
+      - 'src/**/*batch*.py'
+
+env:
+  PYTHON_VERSION: '3.11'
+  POETRY_VERSION: '1.7.0'
+
+jobs:
+  multi-channel-unit-tests:
+    runs-on: ubuntu-latest
+    name: Multi-Channel Unit Tests
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+      
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pypoetry
+            .venv
+          key: ${{ runner.os }}-poetry-multi-channel-${{ hashFiles('**/poetry.lock') }}
+      
+      - name: Install dependencies
+        run: poetry install --with dev
+      
+      - name: Run multi-channel unit tests
+        run: |
+          poetry run pytest tests/unit/test_multi_channel_processor.py \
+            tests/unit/test_batch_orchestrator.py \
+            --cov=src.services.multi_channel_processor \
+            --cov=src.application.batch_orchestrator \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            -v
+      
+      - name: Upload coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: multi-channel-coverage
+          path: coverage.xml
+
+  multi-channel-integration-tests:
+    runs-on: ubuntu-latest
+    name: Multi-Channel Integration Tests
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      
+      - name: Install dependencies
+        run: poetry install --with dev
+      
+      - name: Run integration tests
+        run: |
+          poetry run pytest tests/integration/test_multi_channel_processing.py \
+            tests/integration/test_edge_cases_error_handling.py \
+            --tb=short \
+            --timeout=300 \
+            -v
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.TEST_YOUTUBE_API_KEY || 'dummy_test_key' }}
+
+  parallel-processing-tests:
+    runs-on: ubuntu-latest
+    name: Parallel Processing Tests
+    strategy:
+      matrix:
+        concurrency: [1, 3, 5, 10]
+        channels: [10, 50, 100]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      
+      - name: Install dependencies
+        run: poetry install --with dev
+      
+      - name: Run parallel processing test
+        run: |
+          poetry run python -m pytest tests/integration/test_multi_channel_processing.py::TestMultiChannelProcessing::test_concurrent_channel_limit \
+            --channels=${{ matrix.channels }} \
+            --concurrency=${{ matrix.concurrency }} \
+            -v
+        env:
+          TEST_CONCURRENCY: ${{ matrix.concurrency }}
+          TEST_CHANNELS: ${{ matrix.channels }}
+
+  performance-benchmarks:
+    runs-on: ubuntu-latest
+    name: Performance Benchmarks
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      
+      - name: Install dependencies
+        run: |
+          poetry install --with dev
+          pip install pytest-benchmark memory-profiler
+      
+      - name: Run performance benchmarks
+        run: |
+          poetry run pytest tests/performance/test_multi_channel_performance.py \
+            -m "performance or benchmark" \
+            --benchmark-only \
+            --benchmark-autosave \
+            -v
+      
+      - name: Generate performance report
+        run: |
+          poetry run python scripts/generate_performance_report.py \
+            --input .benchmarks \
+            --output performance_report.html
+      
+      - name: Upload performance report
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-report
+          path: performance_report.html
+      
+      - name: Comment PR with performance results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('performance_report.html', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## Performance Test Results\n\n' + report
+            });
+
+  stress-test:
+    runs-on: ubuntu-latest
+    name: Stress Test
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[stress-test]')
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      
+      - name: Install dependencies
+        run: poetry install --with dev
+      
+      - name: Run stress test
+        run: |
+          poetry run pytest tests/performance/test_multi_channel_performance.py::TestMultiChannelPerformance::test_extremely_large_batch \
+            --stress-test \
+            --channels=1000 \
+            --timeout=1800 \
+            -v
+        timeout-minutes: 30
+
+  test-summary:
+    needs: [multi-channel-unit-tests, multi-channel-integration-tests, parallel-processing-tests]
+    runs-on: ubuntu-latest
+    name: Test Summary
+    if: always()
+    
+    steps:
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: multi-channel-coverage
+          path: coverage/
+        continue-on-error: true
+      
+      - name: Generate test summary
+        run: |
+          echo "## Multi-Channel Feature Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.multi-channel-unit-tests.result }}" == "success" ]]; then
+            echo "✅ Unit Tests: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Unit Tests: Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.multi-channel-integration-tests.result }}" == "success" ]]; then
+            echo "✅ Integration Tests: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Integration Tests: Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.parallel-processing-tests.result }}" == "success" ]]; then
+            echo "✅ Parallel Processing Tests: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Parallel Processing Tests: Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "Coverage report available in artifacts" >> $GITHUB_STEP_SUMMARY

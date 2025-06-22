@@ -64,25 +64,36 @@ class DisplayManager:
     
     def show_channel_info(self, channel: Channel):
         """Display channel information."""
-        info_table = Table(title=f"Channel: {channel.snippet.title}", show_header=False)
-        info_table.add_column("Property", style="cyan")
-        info_table.add_column("Value", style="white")
-        
-        info_table.add_row("Channel ID", channel.id)
-        info_table.add_row("URL", channel.url)
-        
-        if channel.statistics:
-            info_table.add_row("Subscribers", f"{channel.statistics.subscriber_count:,}")
-            info_table.add_row("Total Videos", f"{channel.statistics.video_count:,}")
-            info_table.add_row("Total Views", f"{channel.statistics.view_count:,}")
-        
-        if channel.snippet.published_at:
-            info_table.add_row("Created", channel.snippet.published_at.strftime("%Y-%m-%d"))
-        
-        self.console.print(info_table)
+        try:
+            info_table = Table(title=f"Channel: {channel.snippet.title}", show_header=False)
+            info_table.add_column("Property", style="cyan")
+            info_table.add_column("Value", style="white")
+            
+            info_table.add_row("Channel ID", channel.id)
+            info_table.add_row("URL", channel.url)
+            
+            if channel.statistics:
+                info_table.add_row("Subscribers", f"{channel.statistics.subscriber_count:,}")
+                info_table.add_row("Total Videos", f"{channel.statistics.video_count:,}")
+                info_table.add_row("Total Views", f"{channel.statistics.view_count:,}")
+            
+            if channel.snippet.published_at:
+                info_table.add_row("Created", channel.snippet.published_at.strftime("%Y-%m-%d"))
+            
+            self.console.print(info_table)
+        except Exception as e:
+            # Fallback to basic display
+            self._fallback_channel_info(channel)
     
     def show_processing_stats(self, stats: ProcessingStatistics):
         """Display processing statistics."""
+        try:
+            self._show_processing_stats_rich(stats)
+        except Exception:
+            self._fallback_processing_stats(stats)
+    
+    def _show_processing_stats_rich(self, stats: ProcessingStatistics):
+        """Display processing statistics using Rich."""
         # Main statistics table
         stats_table = Table(title="Processing Statistics", show_header=True)
         stats_table.add_column("Metric", style="cyan")
@@ -136,14 +147,34 @@ class DisplayManager:
             
             self.console.print(error_table)
     
+    def _fallback_processing_stats(self, stats: ProcessingStatistics):
+        """Fallback display for processing stats when Rich fails."""
+        print("\n=== Processing Statistics ===")
+        print(f"Total Videos: {stats.total_videos}")
+        print(f"Processed: {stats.processed_videos}")
+        print(f"Successful: {stats.successful_videos}")
+        print(f"Failed: {stats.failed_videos}")
+        print(f"Skipped: {stats.skipped_videos}")
+        print(f"Progress: {stats.progress_percentage:.1f}%")
+        print(f"Success Rate: {stats.success_rate:.1%}")
+        print()
+    
     def show_video_result(self, video: Video):
         """Display single video result."""
+        try:
+            self._show_video_result_rich(video)
+        except Exception:
+            self._fallback_video_result(video)
+    
+    def _show_video_result_rich(self, video: Video):
+        """Display video result using Rich."""
         status_colors = {
             TranscriptStatus.SUCCESS: "green",
             TranscriptStatus.ERROR: "red",
             TranscriptStatus.NO_TRANSCRIPT: "yellow",
             TranscriptStatus.SKIPPED: "dim",
             TranscriptStatus.PENDING: "blue",
+            TranscriptStatus.IN_PROGRESS: "cyan",
         }
         
         color = status_colors.get(video.transcript_status, "white")
@@ -158,9 +189,29 @@ class DisplayManager:
         
         self.console.print(f"  • {video.title[:60]}... {status_text} {details}")
     
-    def show_summary(self, channel: Channel, start_time: datetime):
+    def _fallback_video_result(self, video: Video):
+        """Fallback display for video result when Rich fails."""
+        status = video.transcript_status.value.upper()
+        title = video.title[:60] + "..." if len(video.title) > 60 else video.title
+        if video.transcript_status == TranscriptStatus.SUCCESS and video.transcript_data:
+            details = f"({video.transcript_data.word_count} words)"
+        elif video.transcript_status == TranscriptStatus.ERROR:
+            details = f"({video.error_message})"
+        else:
+            details = ""
+        print(f"  • {title} [{status}] {details}")
+    
+    def show_summary(self, channel: Channel, start_time: Optional[datetime] = None):
         """Display final summary."""
-        duration = (datetime.now() - start_time).total_seconds()
+        if start_time:
+            duration = (datetime.now() - start_time).total_seconds()
+        else:
+            # Use processing start time from stats if available
+            if channel.processing_stats and channel.processing_stats.processing_start_time:
+                duration = (datetime.now() - channel.processing_stats.processing_start_time).total_seconds()
+            else:
+                duration = 0
+        
         stats = channel.processing_stats
         
         summary_text = [
@@ -256,14 +307,67 @@ class DisplayManager:
             )
             self.console.print(error_panel)
     
+    def _fallback_channel_info(self, channel: Channel):
+        """Fallback display for channel info when Rich fails."""
+        print(f"\n=== Channel: {channel.snippet.title} ===")
+        print(f"Channel ID: {channel.id}")
+        print(f"URL: {channel.url}")
+        if channel.statistics:
+            print(f"Subscribers: {channel.statistics.subscriber_count:,}")
+            print(f"Total Videos: {channel.statistics.video_count:,}")
+            print(f"Total Views: {channel.statistics.view_count:,}")
+        if channel.snippet.published_at:
+            print(f"Created: {channel.snippet.published_at.strftime('%Y-%m-%d')}")
+        print()
+    
     def show_error(self, error: str):
         """Display error message."""
-        self.console.print(f"[bold red]Error:[/bold red] {error}")
+        try:
+            self.console.print(f"[bold red]Error:[/bold red] {error}")
+        except Exception:
+            # Fallback to basic print
+            print(f"ERROR: {error}")
     
     def show_warning(self, warning: str):
         """Display warning message."""
-        self.console.print(f"[bold yellow]Warning:[/bold yellow] {warning}")
+        try:
+            self.console.print(f"[bold yellow]Warning:[/bold yellow] {warning}")
+        except Exception:
+            print(f"WARNING: {warning}")
     
     def show_info(self, info: str):
         """Display info message."""
-        self.console.print(f"[cyan]Info:[/cyan] {info}")
+        try:
+            self.console.print(f"[cyan]Info:[/cyan] {info}")
+        except Exception:
+            print(f"INFO: {info}")
+    
+    def show_status(self, status: str):
+        """Display status message."""
+        try:
+            self.console.print(f"[blue]{status}[/blue]")
+        except Exception:
+            print(f"STATUS: {status}")
+    
+    def create_progress(self):
+        """Create a context manager for progress tracking."""
+        from contextlib import contextmanager
+        
+        @contextmanager
+        def progress_context():
+            """Context manager that manages the Live display lifecycle."""
+            # Start the Live display if not already started
+            if not self.live.is_started:
+                self.start()
+                should_stop = True
+            else:
+                should_stop = False
+            
+            try:
+                yield self.progress
+            finally:
+                # Only stop if we started it
+                if should_stop:
+                    self.stop()
+        
+        return progress_context()

@@ -138,7 +138,7 @@ class TranscriptService:
                     transcript = await self.get_transcript(video, language)
                     if transcript:
                         results[video.id] = transcript
-                        video.transcript = transcript
+                        video.transcript_data = transcript
                         video.transcript_status = TranscriptStatus.SUCCESS
                     else:
                         video.transcript_status = TranscriptStatus.NO_TRANSCRIPT
@@ -171,12 +171,12 @@ class TranscriptService:
             return False
         
         # Check for minimum content
-        if transcript.word_count < 10:
+        if transcript.word_count is not None and transcript.word_count < 10:
             logger.warning(f"Transcript for {transcript.video_id} has very few words: {transcript.word_count}")
             return False
         
         # Check for reasonable duration
-        if transcript.duration < 1:
+        if transcript.duration is not None and transcript.duration < 1:
             logger.warning(f"Transcript for {transcript.video_id} has very short duration: {transcript.duration}s")
             return False
         

@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-06-22T00:00:00.000Z" agent="YouTube Transcriber Architecture" etag="v1.0.0" version="21.1.2" type="device">
+  <diagram name="System Architecture" id="youtube-transcriber-architecture">
+    <mxGraphModel dx="1426" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- User Interface Layer -->
+        <mxCell id="ui-layer" value="User Interface Layer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1080" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="cli-interface" value="CLI Interface&#xa;(Typer)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="80" y="60" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="display-manager" value="Display Manager&#xa;(Rich)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="280" y="60" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="multi-channel-ui" value="Multi-Channel UI&#xa;(Interactive)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="480" y="60" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="progress-display" value="Progress Display&#xa;(Live View)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="680" y="60" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Application Layer -->
+        <mxCell id="app-layer" value="Application Layer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="1080" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="orchestrator" value="Orchestrator&#xa;(Single Channel)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="80" y="180" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="batch-orchestrator" value="Batch Orchestrator&#xa;(Multi-Channel)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="280" y="180" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="ui-backend-bridge" value="UI-Backend Bridge&#xa;(Event System)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="480" y="180" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="error-handler" value="Error Handler&#xa;(Resilience)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="680" y="180" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Service Layer -->
+        <mxCell id="service-layer" value="Service Layer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="1080" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="channel-service" value="Channel Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="80" y="300" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="transcript-service" value="Transcript Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="280" y="300" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="export-service" value="Export Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="480" y="300" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="multi-channel-processor" value="Multi-Channel&#xa;Processor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="680" y="300" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Repository Layer -->
+        <mxCell id="repo-layer" value="Repository Layer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="400" width="1080" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="youtube-api" value="YouTube API&#xa;(Official)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="80" y="420" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="transcript-api" value="Transcript API&#xa;(Third-party)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="280" y="420" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="file-repository" value="File Repository&#xa;(Local Storage)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="480" y="420" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="ytdlp-repository" value="YT-DLP Repository&#xa;(Video Metadata)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="680" y="420" width="160" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- External Systems -->
+        <mxCell id="external-layer" value="External Systems" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="520" width="1080" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="youtube-data-api" value="YouTube Data API v3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="280" y="540" width="260" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="youtube-website" value="YouTube Website" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="580" y="540" width="260" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Arrows -->
+        <mxCell id="arrow1" edge="1" parent="1" source="cli-interface" target="orchestrator">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow2" edge="1" parent="1" source="display-manager" target="batch-orchestrator">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow3" edge="1" parent="1" source="multi-channel-ui" target="ui-backend-bridge">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow4" edge="1" parent="1" source="orchestrator" target="channel-service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow5" edge="1" parent="1" source="batch-orchestrator" target="transcript-service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow6" edge="1" parent="1" source="channel-service" target="youtube-api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow7" edge="1" parent="1" source="transcript-service" target="transcript-api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow8" edge="1" parent="1" source="youtube-api" target="youtube-data-api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow9" edge="1" parent="1" source="transcript-api" target="youtube-website">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  
+  <diagram name="Data Flow" id="data-flow">
+    <mxGraphModel dx="1426" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Single Channel Flow -->
+        <mxCell id="flow-title" value="Single Channel Processing Flow" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-input" value="User Input" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="cli-parser" value="CLI Parser" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="200" y="80" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="orchestrator-flow" value="Orchestrator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="360" y="80" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="channel-service-flow" value="Channel Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="360" y="160" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="youtube-api-flow" value="YouTube API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="360" y="240" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="video-list" value="Video List" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="360" y="320" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="transcript-service-flow" value="Transcript Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="360" y="400" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="transcript-api-flow" value="Transcript API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="360" y="480" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="export-service-flow" value="Export Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="360" y="560" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="file-system" value="File System" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="200" y="640" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Flow arrows -->
+        <mxCell id="flow1" edge="1" parent="1" source="user-input" target="cli-parser">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow2" edge="1" parent="1" source="cli-parser" target="orchestrator-flow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow3" edge="1" parent="1" source="orchestrator-flow" target="channel-service-flow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow4" edge="1" parent="1" source="channel-service-flow" target="youtube-api-flow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow5" edge="1" parent="1" source="youtube-api-flow" target="video-list">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow6" edge="1" parent="1" source="video-list" target="transcript-service-flow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow7" edge="1" parent="1" source="transcript-service-flow" target="transcript-api-flow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow8" edge="1" parent="1" source="transcript-api-flow" target="export-service-flow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow9" edge="1" parent="1" source="export-service-flow" target="file-system">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow10" edge="1" parent="1" source="user-input" target="file-system">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="660" as="targetPoint" />
+            <mxPoint x="100" y="120" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="100" y="660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Multi-Channel Flow -->
+        <mxCell id="multi-flow-title" value="Multi-Channel Processing Flow" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="600" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="batch-input" value="Batch Input" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="600" y="80" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="interactive-ui" value="Interactive UI /&#xa;File Parser" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="760" y="80" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="channel-validation" value="Channel&#xa;Validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="760" y="160" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="batch-orchestrator-flow" value="Batch&#xa;Orchestrator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="760" y="240" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Parallel channels -->
+        <mxCell id="channel1" value="Channel 1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="600" y="320" width="80" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="channel2" value="Channel 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="700" y="320" width="80" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="channel3" value="Channel 3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="800" y="320" width="80" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="channelN" value="Channel N" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="900" y="320" width="80" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="parallel-pool" value="Parallel Processing Pool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="700" y="400" width="180" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="progress-aggregation" value="Progress&#xa;Aggregation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="730" y="480" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="ui-updates" value="UI Updates" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="730" y="560" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="final-report" value="Final Report" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="730" y="640" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Multi-flow arrows -->
+        <mxCell id="mflow1" edge="1" parent="1" source="batch-input" target="interactive-ui">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mflow2" edge="1" parent="1" source="interactive-ui" target="channel-validation">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mflow3" edge="1" parent="1" source="channel-validation" target="batch-orchestrator-flow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mflow4" edge="1" parent="1" source="batch-orchestrator-flow" target="channel1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mflow5" edge="1" parent="1" source="batch-orchestrator-flow" target="channel2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mflow6" edge="1" parent="1" source="batch-orchestrator-flow" target="channel3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mflow7" edge="1" parent="1" source="batch-orchestrator-flow" target="channelN">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mflow8" edge="1" parent="1" source="channel1" target="parallel-pool">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mflow9" edge="1" parent="1" source="channel2" target="parallel-pool">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mflow10" edge="1" parent="1" source="parallel-pool" target="progress-aggregation">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mflow11" edge="1" parent="1" source="progress-aggregation" target="ui-updates">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mflow12" edge="1" parent="1" source="ui-updates" target="final-report">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  
+  <diagram name="Component Relationships" id="component-relationships">
+    <mxGraphModel dx="1426" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <mxCell id="comp-title" value="Component Relationships and Dependencies" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Core Components -->
+        <mxCell id="cli-main" value="CLI Main&#xa;(Entry Point)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="520" y="80" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="single-orchestrator" value="Single Channel&#xa;Orchestrator" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="320" y="200" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="batch-orchestrator-comp" value="Batch&#xa;Orchestrator" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="720" y="200" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="channel-service-comp" value="Channel&#xa;Service" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="220" y="340" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="transcript-service-comp" value="Transcript&#xa;Service" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="420" y="340" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="export-service-comp" value="Export&#xa;Service" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="620" y="340" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="multi-processor" value="Multi-Channel&#xa;Processor" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="820" y="340" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="youtube-api-comp" value="YouTube API&#xa;Repository" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="120" y="480" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="transcript-api-comp" value="Transcript API&#xa;Repository" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="320" y="480" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="file-repo-comp" value="File&#xa;Repository" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="520" y="480" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="display-comp" value="Display&#xa;Manager" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="520" y="200" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="ui-bridge-comp" value="UI-Backend&#xa;Bridge" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="920" y="200" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Dependencies -->
+        <mxCell id="dep1" edge="1" parent="1" source="cli-main" target="single-orchestrator">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="dep2" edge="1" parent="1" source="cli-main" target="batch-orchestrator-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dep3" edge="1" parent="1" source="cli-main" target="display-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dep4" edge="1" parent="1" source="single-orchestrator" target="channel-service-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dep5" edge="1" parent="1" source="single-orchestrator" target="transcript-service-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dep6" edge="1" parent="1" source="single-orchestrator" target="export-service-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dep7" edge="1" parent="1" source="batch-orchestrator-comp" target="multi-processor">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dep8" edge="1" parent="1" source="batch-orchestrator-comp" target="ui-bridge-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dep9" edge="1" parent="1" source="channel-service-comp" target="youtube-api-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dep10" edge="1" parent="1" source="transcript-service-comp" target="transcript-api-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dep11" edge="1" parent="1" source="export-service-comp" target="file-repo-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dep12" edge="1" parent="1" source="multi-processor" target="channel-service-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dep13" edge="1" parent="1" source="multi-processor" target="transcript-service-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dep14" edge="1" parent="1" source="multi-processor" target="export-service-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dep15" edge="1" parent="1" source="ui-bridge-comp" target="display-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Legend -->
+        <mxCell id="legend-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;strokeWidth=2;dashed=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="620" width="300" height="160" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-title" value="Legend" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="620" width="80" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-cli" value="CLI Layer" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="660" width="80" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-app" value="Application" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="160" y="660" width="80" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-service" value="Service" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="60" y="720" width="80" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-repo" value="Repository" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="160" y="720" width="80" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

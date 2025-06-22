@@ -1,0 +1,108 @@
+name: Code Quality
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+
+jobs:
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+        
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        
+    - name: Code Coverage Check
+      run: |
+        pytest tests/ --cov=src --cov-report=xml
+        python -c "
+        import xml.etree.ElementTree as ET
+        tree = ET.parse('coverage.xml')
+        root = tree.getroot()
+        coverage = float(root.attrib['line-rate']) * 100
+        print(f'Coverage: {coverage:.2f}%')
+        if coverage < 60:
+            print('❌ Coverage is below 60%')
+            exit(1)
+        else:
+            print('✅ Coverage meets requirements')
+        "
+        
+    - name: Complexity Analysis
+      run: |
+        radon cc src -a -nb --total-average
+        radon mi src -nb
+        
+    - name: Security Analysis
+      run: |
+        bandit -r src -f json -o bandit-report.json
+        safety check --json
+        
+    - name: License Check
+      run: |
+        pip-licenses --format=csv --output-file=licenses.csv
+        python -c "
+        import csv
+        with open('licenses.csv', 'r') as f:
+            reader = csv.DictReader(f)
+            forbidden = ['GPL', 'AGPL']
+            for row in reader:
+                license = row.get('License', '')
+                if any(f in license for f in forbidden):
+                    print(f'❌ Forbidden license found: {row[\"Name\"]} - {license}')
+                    exit(1)
+        print('✅ All licenses are compatible')
+        "
+        
+    - name: Documentation Coverage
+      run: |
+        interrogate -v src/ -f 60 --badge-file=docs-coverage.svg
+        
+    - name: Comment PR
+      uses: actions/github-script@v6
+      if: github.event_name == 'pull_request'
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Read reports
+          let comment = '## 📊 Code Quality Report\n\n';
+          
+          // Add coverage info
+          comment += '### Coverage\n';
+          comment += 'See coverage report in artifacts\n\n';
+          
+          // Add complexity info
+          comment += '### Complexity\n';
+          comment += 'See radon report in logs\n\n';
+          
+          // Add security info
+          comment += '### Security\n';
+          comment += 'See bandit report in artifacts\n\n';
+          
+          // Comment on PR
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });

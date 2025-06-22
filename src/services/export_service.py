@@ -123,11 +123,11 @@ class ExportService:
         
         # Export individual transcripts
         for video in channel.videos:
-            if video.transcript and video.has_transcript:
+            if video.transcript_data and video.has_transcript:
                 try:
                     file_path = await self.export_transcript(
                         video=video,
-                        transcript=video.transcript,
+                        transcript=video.transcript_data,
                         format_type=format_type,
                         output_dir=channel_dir
                     )
@@ -188,18 +188,18 @@ class ExportService:
                 "title": video.title,
                 "url": video.url,
                 "published_at": video.published_at.isoformat() if video.published_at else None,
-                "duration": video.formatted_duration,
+                "duration": video.duration_formatted,
                 "transcript_status": video.transcript_status.value,
                 "error_message": video.error_message,
                 "exported_file": str(exported_files.get(video.id, ""))
             }
             
-            if video.transcript:
+            if video.transcript_data:
                 video_data.update({
-                    "word_count": video.transcript.word_count,
-                    "character_count": video.transcript.character_count,
-                    "transcript_source": video.transcript.source.value,
-                    "auto_generated": video.transcript.auto_generated
+                    "word_count": video.transcript_data.word_count,
+                    "character_count": video.transcript_data.character_count,
+                    "transcript_source": video.transcript_data.source.value,
+                    "auto_generated": video.transcript_data.auto_generated
                 })
             
             summary["videos"].append(video_data)

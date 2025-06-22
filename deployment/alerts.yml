@@ -1,0 +1,63 @@
+groups:
+  - name: youtube_transcriber_alerts
+    interval: 30s
+    rules:
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: youtube_transcriber_memory_usage_bytes / (1024 * 1024 * 1024) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "YouTube Transcriber is using {{ $value | humanize }}GB of memory"
+
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: youtube_transcriber_cpu_usage_percent > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "YouTube Transcriber CPU usage is {{ $value }}%"
+
+      # Service Down
+      - alert: ServiceDown
+        expr: up{job="youtube-transcriber"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "YouTube Transcriber is down"
+          description: "YouTube Transcriber service has been down for more than 1 minute"
+
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: rate(youtube_transcriber_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanize }} requests per second"
+
+      # API Quota Near Limit
+      - alert: APIQuotaNearLimit
+        expr: youtube_transcriber_api_quota_used / youtube_transcriber_api_quota_limit > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "YouTube API quota near limit"
+          description: "API quota usage is at {{ $value | humanizePercentage }}"
+
+      # Disk Space Low
+      - alert: DiskSpaceLow
+        expr: youtube_transcriber_disk_free_bytes / (1024 * 1024 * 1024) < 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low disk space"
+          description: "Only {{ $value | humanize }}GB of disk space remaining"

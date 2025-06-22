@@ -8,6 +8,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from enum import Enum
 
+from .batch import BatchConfig
+
 
 class OutputFormat(str, Enum):
     """Output format."""
@@ -89,6 +91,7 @@ class AppSettings(BaseSettings):
     processing: ProcessingConfig = Field(default_factory=ProcessingConfig)
     output: OutputConfig = Field(default_factory=OutputConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
+    batch: BatchConfig = Field(default_factory=BatchConfig)
     
     app_name: str = Field("YouTube Transcriber", description="Application name")
     app_version: str = Field("1.0.0", description="Version")
@@ -99,6 +102,7 @@ class AppSettings(BaseSettings):
         env_prefix="YT_TRANSCRIBER_",
         env_nested_delimiter="__",
         case_sensitive=False,
+        extra="allow",
     )
     
     @field_validator('output')

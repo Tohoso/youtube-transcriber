@@ -1,0 +1,345 @@
+# YouTube Transcriber Monitoring Configuration
+# 本番環境監視設定
+
+# メトリクス収集設定
+metrics:
+  # 収集間隔
+  collection_interval: 60s
+  
+  # システムメトリクス
+  system:
+    - name: cpu_usage
+      type: gauge
+      unit: percent
+      description: "CPU使用率"
+      
+    - name: memory_usage
+      type: gauge
+      unit: bytes
+      description: "メモリ使用量"
+      
+    - name: disk_usage
+      type: gauge
+      unit: percent
+      description: "ディスク使用率"
+      
+    - name: network_throughput
+      type: counter
+      unit: bytes/sec
+      description: "ネットワークスループット"
+  
+  # アプリケーションメトリクス
+  application:
+    - name: active_processes
+      type: gauge
+      unit: count
+      description: "アクティブな処理数"
+      
+    - name: videos_processed
+      type: counter
+      unit: count
+      description: "処理済み動画数"
+      tags: ["channel", "status"]
+      
+    - name: processing_duration
+      type: histogram
+      unit: seconds
+      description: "処理時間"
+      buckets: [0.5, 1, 2, 5, 10, 30, 60]
+      
+    - name: api_calls
+      type: counter
+      unit: count
+      description: "API呼び出し数"
+      tags: ["endpoint", "status_code"]
+      
+    - name: error_count
+      type: counter
+      unit: count
+      description: "エラー数"
+      tags: ["error_type", "severity"]
+      
+    - name: queue_size
+      type: gauge
+      unit: count
+      description: "処理待ちキューサイズ"
+
+# アラート設定
+alerts:
+  # システムアラート
+  system_alerts:
+    - name: high_cpu_usage
+      condition: "cpu_usage > 80"
+      duration: 5m
+      severity: warning
+      annotations:
+        summary: "CPU使用率が高い"
+        description: "CPU使用率が80%を超えています"
+      actions:
+        - notify_slack
+        - create_ticket
+    
+    - name: critical_cpu_usage
+      condition: "cpu_usage > 95"
+      duration: 2m
+      severity: critical
+      annotations:
+        summary: "CPU使用率が危険域"
+        description: "CPU使用率が95%を超えています。即時対応が必要です"
+      actions:
+        - notify_pagerduty
+        - notify_slack
+        - auto_scale
+    
+    - name: high_memory_usage
+      condition: "memory_usage > 85%"
+      duration: 5m
+      severity: warning
+      annotations:
+        summary: "メモリ使用率が高い"
+        description: "メモリ使用率が85%を超えています"
+    
+    - name: disk_space_low
+      condition: "disk_usage > 80"
+      duration: 10m
+      severity: warning
+      annotations:
+        summary: "ディスク容量不足"
+        description: "ディスク使用率が80%を超えています"
+      actions:
+        - notify_slack
+        - cleanup_old_files
+  
+  # アプリケーションアラート
+  application_alerts:
+    - name: high_error_rate
+      condition: "rate(error_count[5m]) > 10"
+      severity: critical
+      annotations:
+        summary: "エラー率が高い"
+        description: "5分間のエラー率が10/分を超えています"
+      actions:
+        - notify_pagerduty
+        - notify_slack
+    
+    - name: api_quota_exhaustion
+      condition: "api_quota_remaining < 1000"
+      severity: warning
+      annotations:
+        summary: "APIクォータ残量少"
+        description: "APIクォータが1000未満です"
+      actions:
+        - notify_slack
+        - throttle_requests
+    
+    - name: slow_processing
+      condition: "histogram_quantile(0.95, processing_duration) > 60"
+      duration: 10m
+      severity: warning
+      annotations:
+        summary: "処理速度低下"
+        description: "95%タイルの処理時間が60秒を超えています"
+    
+    - name: queue_backlog
+      condition: "queue_size > 100"
+      duration: 15m
+      severity: warning
+      annotations:
+        summary: "処理キュー滞留"
+        description: "処理待ちが100件を超えています"
+      actions:
+        - scale_workers
+        - notify_slack
+    
+    - name: no_activity
+      condition: "rate(videos_processed[30m]) == 0"
+      severity: info
+      annotations:
+        summary: "処理が停止"
+        description: "30分間処理が行われていません"
+
+# SLI/SLO定義
+sli_slo:
+  # サービスレベル指標
+  availability:
+    sli: "sum(up) / count(up)"
+    slo: 0.995  # 99.5%
+    window: 30d
+    
+  latency:
+    sli: "histogram_quantile(0.95, processing_duration)"
+    slo: 30  # 30秒以内
+    window: 7d
+    
+  error_rate:
+    sli: "sum(error_count) / sum(videos_processed)"
+    slo: 0.05  # 5%以下
+    window: 7d
+    
+  throughput:
+    sli: "rate(videos_processed[1h])"
+    slo: 100  # 100動画/時間以上
+    window: 1d
+
+# 通知設定
+notifications:
+  slack:
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channel: "#youtube-transcriber-alerts"
+    username: "YT Transcriber Monitor"
+    
+  pagerduty:
+    integration_key: "${PAGERDUTY_KEY}"
+    
+  email:
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587
+    from: "alerts@youtube-transcriber.com"
+    to:
+      - "oncall@company.com"
+      - "team@company.com"
+
+# ダッシュボード設定
+dashboards:
+  overview:
+    refresh: 30s
+    panels:
+      - title: "System Metrics"
+        type: graph
+        metrics:
+          - cpu_usage
+          - memory_usage
+          - disk_usage
+          
+      - title: "Processing Status"
+        type: stat
+        metrics:
+          - videos_processed
+          - active_processes
+          - queue_size
+          
+      - title: "Error Rate"
+        type: graph
+        metric: "rate(error_count[5m])"
+        
+      - title: "API Usage"
+        type: gauge
+        metric: "api_quota_remaining / api_quota_limit"
+        
+      - title: "Processing Time Distribution"
+        type: heatmap
+        metric: "processing_duration"
+        
+  detailed:
+    refresh: 60s
+    panels:
+      - title: "Channel Processing"
+        type: table
+        query: "topk(10, sum by (channel) (videos_processed))"
+        
+      - title: "Error Analysis"
+        type: piechart
+        query: "sum by (error_type) (error_count)"
+        
+      - title: "API Endpoint Usage"
+        type: bar
+        query: "sum by (endpoint) (api_calls)"
+
+# ログ集約設定
+logging:
+  # ログレベル別の保持期間
+  retention:
+    debug: 1d
+    info: 7d
+    warning: 30d
+    error: 90d
+    critical: 365d
+    
+  # ログフォーマット
+  format: json
+  
+  # ログ出力先
+  outputs:
+    - type: file
+      path: /var/log/youtube-transcriber/app.log
+      max_size: 100MB
+      max_age: 30d
+      
+    - type: elasticsearch
+      url: "${ELASTICSEARCH_URL}"
+      index: "youtube-transcriber-${date}"
+      
+    - type: cloudwatch
+      log_group: "/aws/youtube-transcriber"
+      stream_name: "${instance_id}"
+
+# トレーシング設定
+tracing:
+  enabled: true
+  sampling_rate: 0.1  # 10%サンプリング
+  
+  jaeger:
+    endpoint: "${JAEGER_ENDPOINT}"
+    service_name: "youtube-transcriber"
+    
+  spans:
+    - name: "video_processing"
+      attributes:
+        - video_id
+        - channel_id
+        - duration
+        
+    - name: "api_call"
+      attributes:
+        - endpoint
+        - status_code
+        - response_time
+
+# 自動スケーリング設定
+autoscaling:
+  enabled: true
+  
+  metrics:
+    - type: cpu
+      target: 70
+      
+    - type: custom
+      metric: queue_size
+      target: 50
+      
+  min_replicas: 2
+  max_replicas: 10
+  
+  scale_up:
+    stabilization_window: 60s
+    policies:
+      - type: percent
+        value: 100
+        period: 60s
+        
+  scale_down:
+    stabilization_window: 300s
+    policies:
+      - type: percent
+        value: 10
+        period: 60s
+
+# ヘルスチェック設定
+health_checks:
+  liveness:
+    endpoint: /health/live
+    interval: 30s
+    timeout: 5s
+    failure_threshold: 3
+    
+  readiness:
+    endpoint: /health/ready
+    interval: 10s
+    timeout: 3s
+    failure_threshold: 2
+    
+  startup:
+    endpoint: /health/startup
+    interval: 10s
+    timeout: 5s
+    failure_threshold: 30

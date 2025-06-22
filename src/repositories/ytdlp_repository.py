@@ -133,12 +133,16 @@ class YtDlpRepository:
             # Check if auto-generated
             auto_generated = "auto" in subtitle_file.name.lower()
             
+            # Generate full text from segments
+            full_text = ' '.join(segment.text for segment in segments)
+            
             return TranscriptData(
                 video_id=video_id,
                 language=language,
                 source=TranscriptSource.YT_DLP,
                 auto_generated=auto_generated,
-                segments=segments
+                segments=segments,
+                full_text=full_text
             )
             
         except Exception as e:

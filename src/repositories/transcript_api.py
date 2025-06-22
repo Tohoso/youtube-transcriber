@@ -41,12 +41,16 @@ class YouTubeTranscriptAPIRepository:
                 for entry in transcript_list
             ]
             
+            # Generate full text from segments
+            full_text = ' '.join(segment.text for segment in segments)
+            
             return TranscriptData(
                 video_id=video_id,
                 language=language,
                 source=TranscriptSource.YOUTUBE_TRANSCRIPT_API,
                 auto_generated=self._is_auto_generated(transcript_list),
                 segments=segments,
+                full_text=full_text,
             )
             
         except (NoTranscriptFound, TranscriptsDisabled, VideoUnavailable) as e:

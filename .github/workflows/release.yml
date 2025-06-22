@@ -1,0 +1,158 @@
+name: Release Automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+      release_type:
+        description: 'Release type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Configure Git
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        
+    - name: Determine version
+      id: version
+      run: |
+        if [ "${{ github.event.inputs.version }}" != "" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          # Get current version from latest tag
+          CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+          CURRENT_VERSION=${CURRENT_VERSION#v}
+          
+          # Bump version based on release type
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          case "${{ github.event.inputs.release_type }}" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          VERSION="${MAJOR}.${MINOR}.${PATCH}"
+        fi
+        
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Version: ${VERSION}"
+        
+    - name: Update version in files
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        
+        # Update version in Python files
+        sed -i "s/__version__ = \".*\"/__version__ = \"${VERSION}\"/" src/__init__.py || true
+        
+        # Update version in Docker files
+        sed -i "s/APP_VERSION=.*/APP_VERSION=${VERSION}/" .env.production
+        sed -i "s/version: \".*\"/version: \"${VERSION}\"/" deployment/k8s/deployment.yaml
+        
+        # Update version in package files
+        sed -i "s/\"version\": \".*\"/\"version\": \"${VERSION}\"/" package.json || true
+        
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Generate changelog from commit messages
+        PREVIOUS_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        
+        if [ -z "$PREVIOUS_TAG" ]; then
+          CHANGELOG=$(git log --pretty=format:"- %s (%h)" | head -20)
+        else
+          CHANGELOG=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s (%h)")
+        fi
+        
+        # Categorize changes
+        echo "# Release Notes for v${{ steps.version.outputs.version }}" > RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        echo "## 🚀 Features" >> RELEASE_NOTES.md
+        echo "$CHANGELOG" | grep -E "(feat|feature):" | sed 's/.*: /- /' >> RELEASE_NOTES.md || echo "- No new features" >> RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        echo "## 🐛 Bug Fixes" >> RELEASE_NOTES.md
+        echo "$CHANGELOG" | grep -E "(fix|bugfix):" | sed 's/.*: /- /' >> RELEASE_NOTES.md || echo "- No bug fixes" >> RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        echo "## 📚 Documentation" >> RELEASE_NOTES.md
+        echo "$CHANGELOG" | grep -E "(docs|doc):" | sed 's/.*: /- /' >> RELEASE_NOTES.md || echo "- No documentation updates" >> RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        echo "## 🔧 Other Changes" >> RELEASE_NOTES.md
+        echo "$CHANGELOG" | grep -vE "(feat|feature|fix|bugfix|docs|doc):" | head -10 >> RELEASE_NOTES.md || echo "- No other changes" >> RELEASE_NOTES.md
+        
+        # Set multiline output
+        echo "changelog<<EOF" >> $GITHUB_OUTPUT
+        cat RELEASE_NOTES.md >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+    - name: Commit version changes
+      run: |
+        git add -A
+        git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+        
+    - name: Create and push tag
+      run: |
+        git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
+        git push origin main --follow-tags
+        
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+        release_name: Release v${{ steps.version.outputs.version }}
+        body: ${{ steps.changelog.outputs.changelog }}
+        draft: false
+        prerelease: false
+        
+    - name: Build and push Docker image
+      run: |
+        docker build -t ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:v${{ steps.version.outputs.version }} .
+        docker push ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:v${{ steps.version.outputs.version }}
+        docker tag ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:v${{ steps.version.outputs.version }} ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        docker push ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        
+  deploy-release:
+    name: Deploy Release
+    needs: create-release
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Deploy to production
+      run: |
+        echo "Deploying version ${{ needs.create-release.outputs.version }} to production..."
+        # Actual deployment commands here

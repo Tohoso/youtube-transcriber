@@ -120,7 +120,7 @@ class FileWriter:
                         )
                         output_paths.append(path)
                     except Exception as e:
-                        print(f"Error writing transcript for video {video.id}: {e}")
+                        logger.error(f"Error writing transcript for video {video.id}: {e}")
             return output_paths
         else:
             # Write all transcripts to a single file
@@ -261,4 +261,4 @@ class FileWriter:
         with open(path, 'w', encoding=self.encoding) as f:
             f.write(content)
         
-        print(f"✓ Written: {path}")
+        logger.info(f"Written: {path}")

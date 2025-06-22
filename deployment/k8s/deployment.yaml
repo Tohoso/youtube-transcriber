@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: youtube-transcriber
+  namespace: youtube-transcriber
+  labels:
+    app: youtube-transcriber
+    version: "1.0.0"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: youtube-transcriber
+  template:
+    metadata:
+      labels:
+        app: youtube-transcriber
+        version: "1.0.0"
+    spec:
+      serviceAccountName: youtube-transcriber
+      containers:
+      - name: youtube-transcriber
+        image: youtube-transcriber:latest
+        imagePullPolicy: Always
+        ports:
+        - name: health
+          containerPort: 8080
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        env:
+        - name: APP_ENV
+          value: "production"
+        - name: YOUTUBE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: youtube-transcriber-secrets
+              key: youtube-api-key
+        envFrom:
+        - configMapRef:
+            name: youtube-transcriber-config
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /live
+            port: health
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: health
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: output
+          mountPath: /app/output
+        - name: config
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+      volumes:
+      - name: output
+        persistentVolumeClaim:
+          claimName: youtube-transcriber-output-pvc
+      - name: config
+        configMap:
+          name: youtube-transcriber-config
+          items:
+          - key: config.yaml
+            path: config.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: youtube-transcriber
+  namespace: youtube-transcriber
+  labels:
+    app: youtube-transcriber
+spec:
+  type: ClusterIP
+  selector:
+    app: youtube-transcriber
+  ports:
+  - name: health
+    port: 8080
+    targetPort: health
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: youtube-transcriber
+  namespace: youtube-transcriber
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: youtube-transcriber-output-pvc
+  namespace: youtube-transcriber
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard

@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  youtube-transcriber-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    image: youtube-transcriber:dev
+    container_name: youtube-transcriber-dev
+    env_file:
+      - .env.local
+    environment:
+      - APP_ENV=development
+      - LOG_LEVEL=DEBUG
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+      - "5678:5678"  # Python debugger port
+    volumes:
+      - .:/app
+      - /app/.venv  # Exclude virtual environment
+      - /app/__pycache__
+    command: python -m src.cli.main --help
+    stdin_open: true
+    tty: true
+    networks:
+      - transcriber-network-dev
+
+  redis-dev:
+    image: redis:7-alpine
+    container_name: youtube-transcriber-redis-dev
+    ports:
+      - "6379:6379"
+    networks:
+      - transcriber-network-dev
+
+networks:
+  transcriber-network-dev:
+    driver: bridge

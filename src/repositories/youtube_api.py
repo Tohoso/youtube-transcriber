@@ -10,6 +10,7 @@ from loguru import logger
 from ..models.channel import Channel, ChannelSnippet, ChannelStatistics
 from ..models.video import Video, VideoStatistics
 from ..utils.rate_limiter import RateLimiter
+from ..utils.quota_tracker import QuotaTracker, AdaptiveRateLimiter
 from ..utils.retry import async_retry
 
 
@@ -18,11 +19,13 @@ class YouTubeAPIRepository:
     
     BASE_URL = "https://www.googleapis.com/youtube/v3"
     
-    def __init__(self, api_key: str, session: aiohttp.ClientSession):
+    def __init__(self, api_key: str, session: aiohttp.ClientSession, quota_limit: int = 10000):
         """Initialize YouTube API repository."""
         self.api_key = api_key
         self.session = session
         self.rate_limiter = RateLimiter(rate=60, per=60.0)
+        self.quota_tracker = QuotaTracker(daily_limit=quota_limit)
+        self.adaptive_limiter = AdaptiveRateLimiter()
     
     @async_retry(max_attempts=3, delay=1.0)
     async def get_channel_info(self, channel_input: str) -> Optional[Channel]:
@@ -31,6 +34,11 @@ class YouTubeAPIRepository:
         if not channel_id:
             return None
         
+        # Check and wait for quota if needed
+        await self.quota_tracker.wait_until_available('channels')
+        
+        # Apply adaptive rate limiting
+        self.rate_limiter.rate = self.adaptive_limiter.get_current_rate()
         await self.rate_limiter.acquire()
         
         url = f"{self.BASE_URL}/channels"
@@ -95,7 +103,7 @@ class YouTubeAPIRepository:
                 "channelId": channel_id,
                 "type": "video",
                 "order": "date",
-                "maxResults": min(max_results, 50),
+                "maxResults": min(max_results, 50) if max_results else 50,
                 "key": self.api_key,
             }
             
@@ -120,10 +128,10 @@ class YouTubeAPIRepository:
                     videos.extend(video_details)
                 
                 next_page_token = data.get("nextPageToken")
-                if not next_page_token or len(videos) >= max_results:
+                if not next_page_token or (max_results and len(videos) >= max_results):
                     break
         
-        return videos[:max_results]
+        return videos[:max_results] if max_results else videos
     
     async def _get_video_details(self, video_ids: List[str]) -> List[Video]:
         """Get detailed information for videos."""
@@ -180,6 +188,7 @@ class YouTubeAPIRepository:
             tags=snippet.get("tags", []),
             category_id=snippet.get("categoryId"),
             language=snippet.get("defaultAudioLanguage") or snippet.get("defaultLanguage"),
+            channel_id=snippet.get("channelId"),
         )
     
     def _parse_duration(self, duration: str) -> int:

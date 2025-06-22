@@ -37,6 +37,7 @@ class Video(BaseModel):
     published_at: Optional[datetime] = Field(None, description="Published date")
     updated_at: Optional[datetime] = Field(None, description="Updated date")
     privacy_status: Optional[VideoPrivacy] = Field(None, description="Privacy setting")
+    channel_id: Optional[str] = Field(None, description="Channel ID")
     
     statistics: Optional[VideoStatistics] = Field(None, description="Statistics")
     
@@ -71,6 +72,29 @@ class Video(BaseModel):
     def has_transcript(self) -> bool:
         """Check if transcript data exists."""
         return self.transcript_data is not None
+    
+    @property
+    def is_private(self) -> bool:
+        """Check if video is private."""
+        return self.privacy_status == VideoPrivacy.PRIVATE if self.privacy_status else False
+    
+    @property
+    def is_live(self) -> bool:
+        """Check if video is a live stream."""
+        # Live streams typically have "live" in the title or description
+        # This is a simple heuristic - you might want to improve this
+        title_lower = self.title.lower()
+        desc_lower = (self.description or "").lower()
+        return any(keyword in title_lower or keyword in desc_lower 
+                  for keyword in ["live stream", "live broadcast", "ライブ", "生放送"])
+    
+    @property
+    def is_short(self) -> bool:
+        """Check if video is a YouTube Short."""
+        # YouTube Shorts are typically <= 60 seconds
+        if self.statistics and self.statistics.duration_seconds:
+            return self.statistics.duration_seconds <= 60
+        return False
     
     @property
     def duration_formatted(self) -> Optional[str]:

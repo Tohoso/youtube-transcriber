@@ -13,6 +13,18 @@ class BaseFormatter(ABC):
         self.include_metadata = include_metadata
         self.include_timestamps = include_timestamps
     
+    def format(self, video: Video, transcript: TranscriptData, include_metadata: bool = True, include_timestamps: bool = False) -> str:
+        """Format a video with its transcript - adapter method for export service"""
+        # Update instance settings if provided
+        self.include_metadata = include_metadata
+        self.include_timestamps = include_timestamps
+        
+        # Store transcript data in video temporarily
+        video.transcript_data = transcript
+        
+        # Use the format_video method
+        return self.format_video(video)
+    
     @abstractmethod
     def format_transcript(self, transcript_data: TranscriptData, video: Video) -> str:
         """Format a single transcript"""

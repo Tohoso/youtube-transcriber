@@ -1,0 +1,224 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  PYTHON_VERSION: '3.11'
+  POETRY_VERSION: '1.7.0'
+
+jobs:
+  # Stage 1: Code Quality Checks
+  code-quality:
+    runs-on: ubuntu-latest
+    name: Code Quality Checks
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pypoetry
+            .venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+      
+      - name: Install dependencies
+        run: poetry install --with dev
+      
+      - name: Run Black formatter check
+        run: poetry run black --check src tests
+        continue-on-error: true
+      
+      - name: Run isort import checker
+        run: poetry run isort --check-only src tests
+        continue-on-error: true
+      
+      - name: Run flake8 linter
+        run: poetry run flake8 src tests --max-line-length=100 --extend-ignore=E203,W503
+        continue-on-error: true
+      
+      - name: Run mypy type checker
+        run: poetry run mypy src --ignore-missing-imports
+        continue-on-error: true
+
+  # Stage 2: Unit Tests
+  unit-tests:
+    needs: code-quality
+    runs-on: ubuntu-latest
+    name: Unit Tests - Python ${{ matrix.python-version }}
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+      fail-fast: false
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pypoetry
+            .venv
+          key: ${{ runner.os }}-${{ matrix.python-version }}-poetry-${{ hashFiles('**/poetry.lock') }}
+      
+      - name: Install dependencies
+        run: poetry install --with dev
+      
+      - name: Run unit tests with coverage
+        run: |
+          poetry run pytest tests/unit \
+            --cov=src \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term-missing \
+            --cov-fail-under=30 \
+            --maxfail=10 \
+            -v
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.TEST_YOUTUBE_API_KEY || 'dummy_test_key' }}
+      
+      - name: Upload coverage reports
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: htmlcov/
+      
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+          verbose: true
+
+  # Stage 3: Integration Tests
+  integration-tests:
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    name: Integration Tests
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+      
+      - name: Install dependencies
+        run: poetry install --with dev
+      
+      - name: Set up test environment
+        run: |
+          cp config.sample.yaml config.test.yaml
+          mkdir -p logs output test_output
+      
+      - name: Run integration tests
+        run: |
+          poetry run pytest tests/integration \
+            --tb=short \
+            --timeout=300 \
+            --asyncio-mode=auto \
+            -v
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.TEST_YOUTUBE_API_KEY || 'dummy_test_key' }}
+          TEST_ENV: 'ci'
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            logs/
+            test_output/
+
+  # Stage 4: Test Report
+  test-report:
+    needs: [unit-tests, integration-tests]
+    runs-on: ubuntu-latest
+    name: Test Summary Report
+    if: always()
+    
+    steps:
+      - name: Download coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage/
+        continue-on-error: true
+      
+      - name: Generate test summary
+        run: |
+          echo "## Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Coverage Report" >> $GITHUB_STEP_SUMMARY
+          echo "Coverage reports have been generated and uploaded as artifacts." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "- Review coverage report to identify untested code" >> $GITHUB_STEP_SUMMARY
+          echo "- Target: 60% coverage for Phase 1" >> $GITHUB_STEP_SUMMARY
+          echo "- Focus on critical paths: CLI, rate limiting, error handling" >> $GITHUB_STEP_SUMMARY
+
+  # Stage 5: Security Scan (Basic)
+  security-check:
+    needs: code-quality
+    runs-on: ubuntu-latest
+    name: Security Checks
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install safety
+        run: pip install safety
+      
+      - name: Install Poetry and export requirements
+        run: |
+          pip install poetry==${{ env.POETRY_VERSION }}
+          poetry export -f requirements.txt --without-hashes > requirements.txt
+      
+      - name: Run safety check
+        run: safety check -r requirements.txt --json
+        continue-on-error: true

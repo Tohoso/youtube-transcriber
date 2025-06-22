@@ -1,0 +1,34 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'youtube-transcriber'
+
+scrape_configs:
+  - job_name: 'youtube-transcriber'
+    static_configs:
+      - targets: ['youtube-transcriber:9090']
+        labels:
+          app: 'youtube-transcriber'
+          environment: 'production'
+    
+    metric_relabel_configs:
+      # Drop unnecessary metrics
+      - source_labels: [__name__]
+        regex: 'go_.*'
+        action: drop
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+        labels:
+          app: 'youtube-transcriber'
+          component: 'redis'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+rule_files:
+  - 'alerts.yml'

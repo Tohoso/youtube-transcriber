@@ -1,288 +1,604 @@
-# YouTube Transcriber
+# YouTube Transcriber 🎥📝
 
-A CLI application for extracting transcripts from all videos in a YouTube channel
+<div align="center">
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](tests/)
 [![日本語](https://img.shields.io/badge/lang-日本語-green.svg)](README.ja.md)
 
-## 📋 Overview
+**Extract transcripts from YouTube channels with ease!**
 
-YouTube Transcriber is a command-line tool that automatically extracts transcripts (subtitles) from all videos in a specified YouTube channel and saves them in various formats.
+[Features](#-features) • [Quick Start](#-quick-start) • [Installation](#-installation) • [Usage](#-usage) • [Multi-Channel](#-multi-channel-processing-new) • [FAQ](#-faq)
 
-### ✨ Key Features
+</div>
 
-- 🚀 **Fast Parallel Processing** - Download multiple video transcripts simultaneously
-- 📊 **Multiple Output Formats** - Support for TXT, JSON, CSV, and Markdown
-- 🔄 **Automatic Retry** - Auto-retry on network errors
-- 📈 **Progress Display** - Real-time processing status and statistics
-- 🛡️ **Robust Error Handling** - Handle various error scenarios gracefully
-- 🌐 **Multi-language Support** - Extract subtitles in any language
-- 📅 **Date Filtering** - Filter videos by date range
+---
+
+## 🎯 What is YouTube Transcriber?
+
+YouTube Transcriber is a powerful command-line tool that automatically downloads transcripts (subtitles) from YouTube videos. Whether you need to archive a channel's content, analyze video transcripts, or create searchable text databases, this tool makes it simple and efficient.
+
+### 💡 Perfect for:
+- 📚 **Researchers** - Analyze video content at scale
+- 📰 **Journalists** - Quickly search through video transcripts
+- 🎓 **Students** - Create study materials from educational videos
+- 🏢 **Businesses** - Archive company YouTube content
+- 🌐 **Content Creators** - Backup your channel's transcripts
+
+## ✨ Features
+
+<table>
+<tr>
+<td>
+
+### 🚀 High Performance
+- **Parallel Processing** - Download multiple transcripts simultaneously
+- **Smart Caching** - Skip already downloaded content
+- **Batch Operations** - Process multiple channels at once
+
+</td>
+<td>
+
+### 📊 Flexible Output
+- **Multiple Formats** - TXT, JSON, CSV, Markdown
+- **Custom Templates** - Configure output structure
+- **Metadata Export** - Save video information
+
+</td>
+</tr>
+<tr>
+<td>
+
+### 🛡️ Robust & Reliable
+- **Auto-Retry** - Handle network issues gracefully
+- **Error Recovery** - Continue from interruptions
+- **Rate Limiting** - Respect API quotas
+
+</td>
+<td>
+
+### 🌍 International
+- **Multi-language** - Extract subtitles in any language
+- **Auto-translation** - Fall back to auto-generated captions
+- **Unicode Support** - Handle all character sets
+
+</td>
+</tr>
+</table>
 
 ## 🚀 Quick Start
 
+Get up and running in under 5 minutes!
+
+```bash
+# 1. Install
+pip install youtube-transcriber
+
+# 2. Set your API key
+export YOUTUBE_API_KEY="your_api_key_here"
+
+# 3. Download transcripts
+youtube-transcriber @mkbhd
+```
+
+That's it! Check the `output/` folder for your transcripts.
+
+## 📦 Installation
+
 ### Prerequisites
 
-- Python 3.9 or higher
-- YouTube Data API v3 key ([How to obtain](#obtaining-youtube-api-key))
+- **Python 3.9+** ([Download Python](https://www.python.org/downloads/))
+- **YouTube API Key** ([Get your free key](#-getting-your-youtube-api-key))
 
-### Installation
+### Option 1: Install from PyPI (Recommended)
+
+```bash
+pip install youtube-transcriber
+```
+
+### Option 2: Install from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/Tohoso/youtube-transcriber.git
+git clone https://github.com/yourusername/youtube-transcriber.git
 cd youtube-transcriber
 
-# Install dependencies
+# Install with pip
 pip install -e .
 ```
+
+### Verify Installation
+
+```bash
+youtube-transcriber --version
+# Output: YouTube Transcriber v1.0.0
+```
+
+## 🔑 Getting Your YouTube API Key
+
+<details>
+<summary>📋 Step-by-step guide (click to expand)</summary>
+
+1. **Go to Google Cloud Console**
+   - Visit [console.cloud.google.com](https://console.cloud.google.com)
+   - Sign in with your Google account
+
+2. **Create a New Project**
+   - Click "Select a project" → "New Project"
+   - Name it (e.g., "YouTube Transcriber")
+   - Click "Create"
+
+3. **Enable YouTube Data API**
+   - Go to "APIs & Services" → "Library"
+   - Search for "YouTube Data API v3"
+   - Click on it and press "Enable"
+
+4. **Create API Key**
+   - Go to "APIs & Services" → "Credentials"
+   - Click "Create Credentials" → "API Key"
+   - Copy your API key
+
+5. **Set the API Key**
+   ```bash
+   # Option 1: Environment variable (recommended)
+   export YOUTUBE_API_KEY="your_api_key_here"
+   
+   # Option 2: Create .env file
+   echo "YOUTUBE_API_KEY=your_api_key_here" > .env
+   ```
+
+</details>
+
+## 📖 Usage
 
 ### Basic Usage
 
 ```bash
-# Set API key as environment variable
-export YOUTUBE_API_KEY="your_api_key_here"
+# Using channel handle
+youtube-transcriber @channelname
 
-# Extract transcripts from all videos in a channel
-youtube-transcriber https://www.youtube.com/@channel_name
+# Using channel URL
+youtube-transcriber https://youtube.com/@channelname
 
-# Or use channel handle directly
-youtube-transcriber @channel_name
+# Using channel ID
+youtube-transcriber UCxxxxxxxxxxxxxx
 ```
 
-## 📖 Detailed Usage
+### Real-time Progress Display
 
-### Command Line Options
+```
+Channel: Marques Brownlee
+Total Videos: 1,543
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45% 00:05:23
 
-```bash
-youtube-transcriber [CHANNEL_INPUT] [OPTIONS]
+✅ iPhone 15 Pro Review (2,345 words)
+✅ Tesla Model S Plaid (3,456 words)
+⏳ Processing: Apple Vision Pro First Look...
 ```
 
-#### Arguments
+### Command Options
 
-- `channel_input` - YouTube channel URL, ID, or @handle
-
-#### Options
-
-| Option | Short | Description | Default |
+| Option | Short | Description | Example |
 |--------|-------|-------------|---------|
-| `--output-dir` | `-o` | Output directory | `./output` |
-| `--format` | `-f` | Output format (txt/json/csv/md) | `txt` |
-| `--language` | `-l` | Transcript language code | `ja` |
-| `--concurrent` | `-c` | Number of concurrent downloads | `5` |
-| `--date-from` | - | Start date (YYYY-MM-DD) | - |
-| `--date-to` | - | End date (YYYY-MM-DD) | - |
-| `--config` | - | Configuration file path | - |
-| `--dry-run` | - | Test run without downloading | `False` |
+| `--output-dir` | `-o` | Output directory | `-o ./transcripts` |
+| `--format` | `-f` | Output format | `-f json` |
+| `--language` | `-l` | Subtitle language | `-l en` |
+| `--concurrent` | `-c` | Parallel downloads | `-c 10` |
+| `--date-from` | | Start date filter | `--date-from 2024-01-01` |
+| `--date-to` | | End date filter | `--date-to 2024-12-31` |
 
 ### Examples
 
-#### 1. Specify Output Format
+#### 📄 Different Output Formats
 
 ```bash
-# Output in JSON format
-youtube-transcriber @channel_name --format json
+# JSON format (structured data)
+youtube-transcriber @mkbhd --format json
 
-# Save as Markdown in specific directory
-youtube-transcriber @channel_name --format md --output-dir ./transcripts
+# Markdown format (readable)
+youtube-transcriber @mkbhd --format markdown
+
+# CSV format (for spreadsheets)
+youtube-transcriber @mkbhd --format csv
 ```
 
-#### 2. Specify Language
+#### 🌐 Language Selection
 
 ```bash
-# Get English subtitles
-youtube-transcriber @channel_name --language en
+# English subtitles
+youtube-transcriber @mkbhd --language en
 
-# Get Korean subtitles
-youtube-transcriber @channel_name --language ko
+# Japanese subtitles
+youtube-transcriber @mkbhd --language ja
+
+# Spanish subtitles
+youtube-transcriber @mkbhd --language es
 ```
 
-#### 3. Filter by Date
+#### 📅 Date Filtering
 
 ```bash
-# Only videos from 2024
-youtube-transcriber @channel_name --date-from 2024-01-01 --date-to 2024-12-31
+# Videos from 2024 only
+youtube-transcriber @mkbhd --date-from 2024-01-01 --date-to 2024-12-31
 
-# Recent month's videos
-youtube-transcriber @channel_name --date-from 2024-11-01
+# Last 30 days
+youtube-transcriber @mkbhd --date-from $(date -d '30 days ago' +%Y-%m-%d)
 ```
 
-#### 4. Adjust Concurrency
+## 🎯 Multi-Channel Processing (NEW!)
+
+Process multiple YouTube channels efficiently with our new batch processing feature!
+
+### Interactive Mode
+
+The easiest way to process multiple channels:
 
 ```bash
-# Fast processing with 10 parallel downloads
-youtube-transcriber @channel_name --concurrent 10
-
-# Sequential processing (stable)
-youtube-transcriber @channel_name --concurrent 1
+youtube-transcriber interactive
 ```
 
-### Configuration File
+<details>
+<summary>📸 Interactive Mode Demo (click to expand)</summary>
 
-Create a YAML configuration file for complex settings.
+```
+┌─────────────────────────────────────────────────────┐
+│ YouTube Transcriber - Multi-Channel Processing      │
+│                                                     │
+│ Features:                                           │
+│ • Add multiple channels at once                     │
+│ • Search YouTube for channels                       │
+│ • Filter and sort your selection                    │
+│ • Validate channels before processing               │
+└─────────────────────────────────────────────────────┘
 
-#### Generate Sample Config
+What would you like to do? [add/search/filter/sort/validate/proceed/quit]: add
+
+Add Channels
+Enter channel URLs, @handles, or IDs (one per line)
+Press Enter twice to finish
+
+[1] @mkbhd
+✅ Added: @mkbhd
+[2] @LinusTechTips
+✅ Added: @LinusTechTips
+[3] @UnboxTherapy
+✅ Added: @UnboxTherapy
+[4] 
+
+Channel Selection (3 total)
+┌───┬──────────────────┬──────────┬─────────────┬────────┐
+│ # │ Channel          │ Status   │ Subscribers │ Videos │
+├───┼──────────────────┼──────────┼─────────────┼────────┤
+│ 1 │ @mkbhd          │ ✅ Valid │ 18.1M       │ 1,543  │
+│ 2 │ @LinusTechTips  │ ✅ Valid │ 15.4M       │ 5,678  │
+│ 3 │ @UnboxTherapy   │ ✅ Valid │ 18.2M       │ 2,345  │
+└───┴──────────────────┴──────────┴─────────────┴────────┘
+
+What would you like to do? proceed
+
+Processing 3 channels...
+```
+
+</details>
+
+### Batch File Mode
+
+Process channels from a file:
+
+```bash
+# Create a file with channel list
+cat > channels.txt << EOF
+# Tech Channels
+@mkbhd
+@LinusTechTips
+@UnboxTherapy
+
+# News Channels
+@verge
+@CNBC
+EOF
+
+# Process all channels
+youtube-transcriber batch channels.txt
+```
+
+### Live Progress Display
+
+```
+YouTube Transcriber - Multi-Channel Processing
+
+Total Channels: 5
+Total Videos: 12,543
+Processed: 5,234
+Processing Rate: 45.2 videos/min
+
+█████████████████░░░░░░░░░░░░░░░░ 41.7% (5234/12543)
+
+┌─────────────────┬────────────────┬─────────┬─────────┬────────┬──────────┬───────┐
+│ Channel         │ Progress       │ Status  │ Success │ Failed │ Rate     │ ETA   │
+├─────────────────┼────────────────┼─────────┼─────────┼────────┼──────────┼───────┤
+│ MKBHD          │ ██████████ 100%│ ✅ Done │ 1,543   │ 0      │ 32.1 v/h │ -     │
+│ Linus Tech Tips │ ████░░░░░░ 42% │ ⚡ Active│ 2,385   │ 12     │ 28.5 v/h │ 3h 2m │
+│ Unbox Therapy   │ ░░░░░░░░░░ 0%  │ ⏳ Wait  │ 0       │ 0      │ -        │ -     │
+│ The Verge       │ ░░░░░░░░░░ 0%  │ ⏳ Wait  │ 0       │ 0      │ -        │ -     │
+│ CNBC           │ ░░░░░░░░░░ 0%  │ ⏳ Wait  │ 0       │ 0      │ -        │ -     │
+└─────────────────┴────────────────┴─────────┴─────────┴────────┴──────────┴───────┘
+```
+
+### Advanced Multi-Channel Options
+
+```bash
+# Process large channels only (>1M subscribers)
+youtube-transcriber batch channels.txt --filter large
+
+# Sort by subscriber count
+youtube-transcriber batch channels.txt --sort subscribers
+
+# Limit parallel channels
+youtube-transcriber batch channels.txt --parallel-channels 2
+
+# Resume interrupted batch
+youtube-transcriber batch channels.txt --resume
+```
+
+## 📁 Output Structure
+
+```
+output/
+├── mkbhd/
+│   ├── channel_info.json           # Channel metadata
+│   ├── processing_stats.json       # Processing statistics
+│   ├── videos/
+│   │   ├── 2024-01-15_iPhone_15_Review_abc123.txt
+│   │   ├── 2024-02-20_Tesla_Update_def456.txt
+│   │   └── ...
+│   └── metadata/
+│       └── video_metadata.json     # All video information
+├── LinusTechTips/
+│   └── ...
+└── summary_report.html            # Visual summary of all channels
+```
+
+## ⚙️ Configuration
+
+### Generate Configuration File
 
 ```bash
 youtube-transcriber config --generate
 ```
 
-#### Example config.yaml
+### Example Configuration
 
 ```yaml
+# config.yaml
 api:
   youtube_api_key: ${YOUTUBE_API_KEY}
-  quota_limit: 10000
+  quota_limit: 10000                # Daily API quota
 
 processing:
-  concurrent_limit: 5
-  retry_attempts: 3
-  retry_delay: 1.0
-  rate_limit_per_minute: 60
-  timeout_seconds: 30
-  skip_private_videos: true
-  skip_live_streams: true
-
+  concurrent_limit: 5               # Parallel video downloads
+  retry_attempts: 3                 # Retry failed downloads
+  rate_limit_per_minute: 60        # API calls per minute
+  
 output:
-  default_format: txt
+  default_format: txt              # txt, json, csv, md
   output_directory: ./output
   filename_template: "{date}_{title}_{video_id}"
-  include_metadata: true
-  include_timestamps: false
-  max_filename_length: 100
-
-logging:
-  level: INFO
-  log_file: logs/app.log
-  max_file_size: "500 MB"
-  retention_days: 10
-  enable_json_logging: false
+  
+# Multi-channel settings
+batch:
+  max_channels: 5                  # Process 5 channels simultaneously
+  channel_delay: 5                 # Seconds between channels
+  save_progress: true             # Enable resume feature
 ```
 
-Run with config file:
+### Use Configuration
 
 ```bash
-youtube-transcriber @channel_name --config config.yaml
-```
-
-## 📁 Output File Structure
-
-```
-output/
-└── channel_name/
-    ├── channel_info.json          # Channel information
-    ├── processing_stats.json      # Processing statistics
-    ├── videos/
-    │   ├── 2024-01-01_video_title_abc123.txt
-    │   ├── 2024-01-02_another_video_def456.txt
-    │   └── ...
-    └── metadata/
-        ├── abc123.json           # Video metadata
-        ├── def456.json
-        └── ...
+youtube-transcriber @mkbhd --config config.yaml
 ```
 
 ## 🔧 Advanced Features
 
-### Processing Statistics
+### Dry Run Mode
 
-The application provides detailed processing statistics:
+Test without downloading:
 
-- Total and processed video counts
-- Success and failure rates
-- Error analysis by type
-- Estimated time remaining
-- Processing rate (videos/hour)
+```bash
+youtube-transcriber @mkbhd --dry-run
+# Shows what would be downloaded without actually downloading
+```
+
+### Export Formats
+
+<table>
+<tr>
+<th>TXT (Default)</th>
+<th>JSON</th>
+</tr>
+<tr>
+<td>
+
+```text
+iPhone 15 Pro Review
+2024-01-15
+
+So I've been using the iPhone 15 Pro
+for about two weeks now and I have
+some thoughts...
+```
+
+</td>
+<td>
+
+```json
+{
+  "video_id": "abc123",
+  "title": "iPhone 15 Pro Review",
+  "date": "2024-01-15",
+  "segments": [
+    {
+      "text": "So I've been using...",
+      "start": 0.0,
+      "duration": 4.5
+    }
+  ]
+}
+```
+
+</td>
+</tr>
+</table>
 
 ### Error Handling
 
-Automatic handling of common errors:
+The tool handles errors gracefully:
 
-- Network errors → Automatic retry
-- Rate limiting → Automatic wait
-- No subtitles → Skip and continue
-- API limits → Appropriate error messages
+- **Network Issues** → Automatic retry with exponential backoff
+- **Rate Limiting** → Automatic pause and resume
+- **No Subtitles** → Skip and log, continue with next video
+- **API Quota** → Clear warning with reset time
 
-## 🔑 Obtaining YouTube API Key
+## 📊 Statistics & Reporting
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project (or select existing)
-3. Navigate to "APIs & Services" → "Library"
-4. Search for "YouTube Data API v3"
-5. Enable the API
-6. Go to "Credentials" → "Create Credentials" → "API Key"
-7. Copy the generated API key
-
-### Setting the API Key
-
-#### Method 1: Environment Variable (Recommended)
-
-```bash
-export YOUTUBE_API_KEY="your_api_key_here"
-```
-
-#### Method 2: .env File
-
-Create `.env` file in project root:
+After processing, view detailed statistics:
 
 ```
-YOUTUBE_API_KEY=your_api_key_here
+═══════════════════════════════════════════════════════════
+                    Processing Complete
+═══════════════════════════════════════════════════════════
+
+Channel: MKBHD
+Total Videos: 1,543
+Processed: 1,543
+Successful: 1,521 (98.6%)
+Failed: 22 (1.4%)
+Total Words: 2,845,123
+Processing Time: 48m 23s
+Average Speed: 31.9 videos/min
+
+Error Breakdown:
+- No transcript available: 15 videos
+- Private videos: 5 videos
+- Network errors: 2 videos
+
+Output saved to: ./output/mkbhd/
 ```
 
-#### Method 3: Config File
+## ❓ FAQ
 
-Add directly to `config.yaml` (be careful with security)
+<details>
+<summary><strong>How many videos can I process?</strong></summary>
+
+With the free YouTube API quota (10,000 units/day), you can process approximately:
+- Single channel: 500-1000 videos/day
+- Checking video info: ~3 units
+- Downloading transcript: ~0 units (no API cost)
+</details>
+
+<details>
+<summary><strong>What if a video has no subtitles?</strong></summary>
+
+The tool will:
+1. Try to get manual subtitles
+2. Fall back to auto-generated subtitles
+3. Skip if none available (logged in report)
+</details>
+
+<details>
+<summary><strong>Can I resume if interrupted?</strong></summary>
+
+Yes! The tool automatically skips already downloaded transcripts. Just run the same command again.
+</details>
+
+<details>
+<summary><strong>What languages are supported?</strong></summary>
+
+All YouTube subtitle languages. Use language codes like:
+- `en` - English
+- `es` - Spanish
+- `ja` - Japanese
+- `ko` - Korean
+- [Full list](https://developers.google.com/youtube/v3/docs/i18nLanguages/list)
+</details>
 
 ## 🧪 Development
 
-### Development Setup
+### Setup Development Environment
 
 ```bash
-# Install development dependencies
+# Clone repo
+git clone https://github.com/yourusername/youtube-transcriber.git
+cd youtube-transcriber
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install in development mode
 pip install -e ".[dev]"
+```
 
-# Run tests
-pytest tests/
+### Run Tests
 
-# Coverage report
+```bash
+# All tests
+pytest
+
+# With coverage
 pytest --cov=src tests/
 
-# Code formatting
+# Specific test file
+pytest tests/test_cli.py -v
+```
+
+### Code Quality
+
+```bash
+# Format code
 black src/ tests/
 
-# Linting
+# Lint
 ruff check src/ tests/
-```
 
-### Architecture
-
-```
-src/
-├── cli/           # CLI interface
-├── models/        # Pydantic data models
-├── services/      # Business logic
-├── repositories/  # External API integration
-└── utils/         # Utilities
+# Type checking
+mypy src/
 ```
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
 ## 🙏 Acknowledgments
 
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Powerful video download library
-- [youtube-transcript-api](https://github.com/jdepoix/youtube-transcript-api) - YouTube transcript API
-- [Typer](https://typer.tiangolo.com/) - Excellent CLI framework
-- [Rich](https://rich.readthedocs.io/) - Beautiful terminal output
+Built with these awesome libraries:
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - YouTube video downloader
+- [youtube-transcript-api](https://github.com/jdepoix/youtube-transcript-api) - Transcript extraction
+- [Typer](https://typer.tiangolo.com/) - CLI framework
+- [Rich](https://rich.readthedocs.io/) - Beautiful terminal formatting
 
-## 📞 Support
+## 💬 Support & Community
 
-- Bug Reports: [Issues](https://github.com/Tohoso/youtube-transcriber/issues)
-- Feature Requests: [Discussions](https://github.com/Tohoso/youtube-transcriber/discussions)
-- Questions: [Discussions](https://github.com/Tohoso/youtube-transcriber/discussions)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/yourusername/youtube-transcriber/issues)
+- 💡 **Feature Requests**: [Discussions](https://github.com/yourusername/youtube-transcriber/discussions)
+- 💬 **Questions**: [Discussions](https://github.com/yourusername/youtube-transcriber/discussions)
+- 📧 **Email**: support@youtube-transcriber.com
 
 ## 🚨 Disclaimer
 
-This tool is created for educational and research purposes. Please comply with YouTube's Terms of Service and respect copyright. Excessive API requests may be rate limited.
+This tool is for educational and research purposes. Please:
+- Respect YouTube's Terms of Service
+- Don't overload the API
+- Credit content creators
+- Use transcripts responsibly
+
+---
+
+<div align="center">
+
+**Made with ❤️ by the YouTube Transcriber Team**
+
+[⬆ Back to top](#youtube-transcriber-)
+
+</div>
